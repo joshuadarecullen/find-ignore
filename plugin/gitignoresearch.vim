@@ -1,4 +1,4 @@
-" plugin/find-ignore.vim
+" plugin/gitignoresearch-ignore.vim
 
 " Guard against multiple loading
 if exists('g:loaded_gitignoresearch')
