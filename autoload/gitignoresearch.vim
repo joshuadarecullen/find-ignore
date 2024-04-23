@@ -1,9 +1,8 @@
 " autoload/gitignoresearch.vim
 " TODO:
 " 1. Make directories come up in the list before searching there file
-" 2. Fix error when going deep into nested directories that the search does
-" not start from the root of the project
 " content, similar to find command
+" 2. Set a default mapping
 
 function! gitignoresearch#isGitRepo()
   " Execute the git command and redirect standard error to null to avoid messy output
@@ -17,50 +16,68 @@ function! gitignoresearch#isGitRepo()
   endtry
 endfunction
 
+
 " Get list of files tracked by git, respecting .gitignore
 function! gitignoresearch#getGitFiles()
+
   if !gitignoresearch#isGitRepo()
     echoerr "Not a Git repository. Please run this command within a Git repository."
     return []
   endif
+
   try
-    return split(system('git ls-files --full-name'), "\n")
+    "Set the search from the top level of the git repo"
+    let gitRoot = substitute(system('git rev-parse --show-toplevel'), '\n$', '', '')
+    let fileList = split(system('cd ' . gitRoot . ' && git ls-files --full-name'), "\n")
+    return fileList
   catch  
     echoerr "Failed to list Git files."
     return []
   endtry
+
 endfunction
+
 
 " Completion function for GitFind (tab completion)
 function! gitignoresearch#findComplete(ArgLead, CmdLine, CursorPos)
+
   let files = gitignoresearch#getGitFiles()
+
   try
     let matches = filter(files, 'v:val =~ a:ArgLead')
     redraw!
     return matches
   catch
-    echoerr "Failed to list Git files."
+    echoerr "Failed file filter operation."
     return []
   endtry
+
 endfunction
 
 " Function to handle GitFind command
 function! gitignoresearch#find(pattern)
+
   let files = gitignoresearch#getGitFiles()
   if empty(files)
     return
   endif
+
   try 
     let matches = filter(copy(files), 'v:val =~ a:pattern')
-    if empty(matches)
-      echo "No files match your pattern."
-      return
-    endif
-    execute 'edit ' . matches[0]
   catch
-    echoerr "Failed matching file operation"
+    echoerr "Failed file filter operation"
+    return
+  endtry
+
+  try
+    let gitRoot = substitute(system('git rev-parse --show-toplevel'), '\n$', '', '')
+    " Prepend the Git root directory to the matched file path
+    execute 'edit ' . gitRoot . '/' . matches[0]
+  catch
+    echoerr "Failed file matching operation"
     return
   endtry  
+
 endfunction
 
 " Function to handle GitGrep command
