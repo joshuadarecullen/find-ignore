@@ -1,2 +1,7 @@
-# find-ignore
-Utilising the .gitignore files when using find in vim.
+Utilises the .gitignore for file searching in vim.
+
+Command:
+  :GitFind
+
+Dependencies:
+  git
