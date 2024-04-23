@@ -1,5 +1,8 @@
 " autoload/gitignoresearch.vim
-" TODO: Make directories come up in the list before searching there file
+" TODO:
+" 1. Make directories come up in the list before searching there file
+" 2. Fix error when going deep into nested directories that the search does
+" not start from the root of the project
 " content, similar to find command
 
 function! gitignoresearch#isGitRepo()
