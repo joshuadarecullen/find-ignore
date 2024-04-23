@@ -1,7 +1,8 @@
 " autoload/gitignoresearch.vim
+" TODO: Make directories come up in the list before searching there file
+" content, similar to find command
 
 function! gitignoresearch#isGitRepo()
-  " let isGitRepo = substitute(system('git rev-parse --is-inside-work-tree'), '\_s*', '', 'g')
   " Execute the git command and redirect standard error to null to avoid messy output
   " Uses substitute to remove all whitespace including newlines and spaces
   try
@@ -20,8 +21,8 @@ function! gitignoresearch#getGitFiles()
     return []
   endif
   try
-    return split(system('git ls-files'), "\n")
-  catch
+    return split(system('git ls-files --full-name'), "\n")
+  catch  
     echoerr "Failed to list Git files."
     return []
   endtry
@@ -34,7 +35,7 @@ function! gitignoresearch#findComplete(ArgLead, CmdLine, CursorPos)
     let matches = filter(files, 'v:val =~ a:ArgLead')
     redraw!
     return matches
-  catch  
+  catch
     echoerr "Failed to list Git files."
     return []
   endtry
@@ -46,7 +47,6 @@ function! gitignoresearch#find(pattern)
   if empty(files)
     return
   endif
-
   try 
     let matches = filter(copy(files), 'v:val =~ a:pattern')
     if empty(matches)
@@ -57,7 +57,7 @@ function! gitignoresearch#find(pattern)
   catch
     echoerr "Failed matching file operation"
     return
-
+  endtry  
 endfunction
 
 " Function to handle GitGrep command
@@ -70,4 +70,3 @@ function! gitignoresearch#grep(search_term)
   execute grep_cmd
   copen
 endfunction
-
